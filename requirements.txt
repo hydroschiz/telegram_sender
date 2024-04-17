@@ -1,3 +1,11 @@
-aiogram~=3.4.1
-environs~=10.3.0
-aiosqlite~=0.19.0
+environs
+Telethon
+requests
+LOLZTEAM
+TGConvertor
+aiogram
+opentele
+aiosqlite
+Pyrogram
+pandas
+openpyxl

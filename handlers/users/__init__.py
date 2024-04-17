@@ -1,1 +1,1 @@
-from . import commands
+from .commands import command_start, command_admin
