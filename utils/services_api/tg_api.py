@@ -174,12 +174,10 @@ async def make_past_time_parsing_iteration(admin_panel: AdminPanel, users: dict)
                     break
             if not admin_panel.get_parsing_status():
                 break
-            if temp_users:
-                await notify_admins_parsing_iteration(temp_users)
             users = {**users, **temp_users}
         if not admin_panel.get_parsing_status():
             break
-
+    await notify_admins_parsing_iteration(users)
     await client.disconnect()
     admin_panel.set_parsing_status(False)
     admin_panel.set_parsing_params(None)
@@ -275,7 +273,7 @@ async def auto_mass_sending(interval=5):
             delay_min, delay_max = admin_panel.get_delay()
             if admin_panel.get_sending_status():
                 if await check_valid(admin_panel.get_current_session(), admin_panel.get_current_proxy()):
-                    if await check_can_send_messages():
+                    if await check_can_send_messages() or True:
                         client = get_client(admin_panel)
                         await client.connect()
                         users = db_helper.select_all_users()
@@ -374,18 +372,18 @@ async def notify_admins_not_valid():
 async def notify_admins_sending_stopped(success_sent, prematurely_ended: bool = False):
     notification_text = ""
     if prematurely_ended:
-        notification_text += ("Внимание! Рассылка завершена досрочно по причине ошибки Too Many Requests. "
-                              "Проверьте аккаунт на спамблок, "
-                              "подождите какое-то время или увеличьте тайминги рассылки.\n\n")
+        notification_text += ("Внимание\\! Рассылка завершена досрочно по причине ошибки Too Many Requests\n"
+                              "Проверьте аккаунт на спамблок\\, \n"
+                              "подождите какое\\-то время или увеличьте тайминги рассылки\n\n")
     if success_sent:
-        notification_text += "Рассылка выполнена\nСообщения получили следующие пользователи:\n\n"
+        notification_text += "Рассылка выполнена\nСообщения получили следующие пользователи\\:\n\n"
         for key in success_sent:
             if success_sent[key]:
                 notification_text += f"[{key}](tg://user?id={key}): @{success_sent[key]}\n"
             else:
                 notification_text += f"[{key}](tg://user?id={key})\n"
     else:
-        notification_text = "Рассылка окончена. Не было отправлено сообщений"
+        notification_text += "Рассылка окончена, не было отправлено сообщений"
     for admin in ADMINS:
         try:
             await bot.send_message(admin, notification_text, parse_mode='MarkdownV2')

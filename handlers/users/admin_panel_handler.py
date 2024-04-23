@@ -8,7 +8,7 @@ from filters.is_admin import IsAdmin
 from keyboards.inline.admin_panel_keyboard import get_keywords_keyboard, admin_panel_buttons, edit_message_buttons, \
     get_groups_keyboard, services_keyboard, get_services_keyboard, accounts_tg_keyboard, \
     proxy_keyboard, get_mass_sending_keyboard
-from loader import bot, get_admin_panel
+from loader import bot, get_admin_panel, db_helper
 from loader import get_current_message_id
 from utils.services_api.tg_api import check_valid
 
@@ -100,7 +100,13 @@ async def accounts_tg_button(call: types.CallbackQuery):
 @router.callback_query(F.data == "mass_sending", IsAdmin())
 async def mass_sending_button(call: types.CallbackQuery):
     admin_panel = get_admin_panel()
-    await bot.edit_message_text(text=f"Состояние рассылки: {admin_panel.get_sending_status()}",
+    users_count = len(db_helper.select_all_users())
+    min_delay, max_delay = admin_panel.get_delay()
+    await bot.edit_message_text(text=f"Состояние рассылки: {admin_panel.get_sending_status()}\n"
+                                     f"Тайминги рассылки: от {min_delay} до "
+                                     f"{max_delay} секунд\n"
+                                     f"Примерное время рассылки: от {users_count * (min_delay + 2)} до"
+                                     f" {users_count * max_delay} секунд",
                                 chat_id=call.from_user.id,
                                 message_id=get_current_message_id(call.from_user.id),
                                 reply_markup=get_mass_sending_keyboard())
